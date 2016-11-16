@@ -1,0 +1,55 @@
+NAME="constantine-backgrounds"
+VERSION=12.1.1
+RELEASE=1
+CATEGORY="X11"
+SUMMARY="Fedora 12 desktop wallpaper"
+DESCRIPTION="Default wallpaper for the Fedora 12 release, along with a
+collection of selected wallpapers contributed by the Fedora community."
+HOMEPAGE="https://fedoraproject.org/wiki/Design"
+SRC_URI="https://fedorahosted.org/released/design-team/${NAME}-${VERSION}.tar.lzma"
+
+ARCH=noarch
+
+PKG_NAMES="${NAME} ${NAME}-extras"
+constantine_backgrounds_CONTENTS="
+	usr/share/backgrounds/constantine/default/
+	usr/share/backgrounds/xfce/constantine.*
+	usr/share/gnome-background-properties/desktop-backgrounds-constantine.xml
+	usr/share/mate-background-properties/desktop-backgrounds-constantine.xml
+	usr/share/wallpapers/Constantine/
+	usr/share/doc/${NAME}/
+"
+constantine_backgrounds_extras_DOCS="COPYING Credits"
+constantine_backgrounds_extras_CONTENTS="
+	usr/share/backgrounds/constantine/extras/
+	usr/share/backgrounds/xfce/constantine-*
+	usr/share/gnome-background-properties/desktop-backgrounds-constantine-extras.xml
+	usr/share/mate-background-properties/desktop-backgrounds-constantine-extras.xml
+	usr/share/wallpapers/Constantine_*/
+"
+
+src_compile() {
+	cd ${S}
+	cygmake
+}
+
+src_install() {
+	cd ${S}
+	cyginstall
+	mv ${D}/usr/share/{xfce4/backdrops,backgrounds/xfce}
+
+	dodir /usr/share/mate-background-properties
+	sed -e 's|gnome-wp|mate-wp|' default/desktop-backgrounds-constantine.xml \
+	    > ${D}/usr/share/mate-background-properties/desktop-backgrounds-constantine.xml
+	sed -e 's|gnome-wp|mate-wp|' extras/desktop-backgrounds-constantine-extras.xml \
+	    > ${D}/usr/share/mate-background-properties/desktop-backgrounds-constantine-extras.xml
+
+	dodir /usr/share/backgrounds/xfce
+	dosym ../../backgrounds/constantine/default/wide/constantine.png \
+	      /usr/share/backgrounds/xfce/constantine.png
+
+	for f in ${D}/usr/share/backgrounds/constantine/extras/wide/*.{jpg,png}
+	do
+		dosym ../../${f##*/share/} /usr/share/backgrounds/xfce/constantine-${f##*/}
+	done
+}
